@@ -23,6 +23,8 @@ def dessiner_grille(screen, grille):
                 flag_rect = FLAG_IMG.get_rect(center=rect.center) #Crée un rectangle de la taille de l'image et Centre ce rectangle sur le centre de la cellule
                 screen.blit(FLAG_IMG, flag_rect)#blit() : Méthode PyGame pour copier une image sur une surface
             
+            if cell.revealed:
+                pygame.draw.circle(screen, (255, 0, 0), rect.center, CELL_SIZE // 4)  # Cercle rouge pour la mine
             pygame.draw.rect(screen, (1,2,3), rect, 1)# Dessine uniquement le contour du rectangle. et 1 indique l'épaisseur du trait.
         
 
@@ -40,6 +42,13 @@ def main():
                 lig = y // CELL_SIZE
                 if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes:
                     grille.put_flag(lig, col)
+        
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # clic gauche
+            x, y = pygame.mouse.get_pos()
+            col = x // CELL_SIZE
+            lig = y // CELL_SIZE
+            if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes:
+                grille.reveal_cell(lig, col)  # Appel à la méthode reveal_cell
 
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
