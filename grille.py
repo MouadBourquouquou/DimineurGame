@@ -5,6 +5,7 @@ class Cellule:
     def __init__(self):
         self.flagged = False  # Seul attribut nécessaire
         self.revealed = False  # Si la cellule a été révélée
+        self.has_mine = False # Si la cellule contient une mine
 
         
 class Grille:
@@ -33,3 +34,20 @@ class Grille:
             # Révèle toutes les mines
             for mine in self.champ.mines:
                 self.cells[mine.x][mine.y].revealed = True
+                
+    
+    # Compte le nombre de mines voisines pour une cellule donnée
+    # Cette méthode est appelée lorsque la cellule est révélée
+    # et permet de savoir combien de mines sont autour d'elle     par Abdelghani Bensalih
+    def compter_mines_voisines(self, lig, col):
+        mines = 0
+        for i in range(-1, 2):  # -1, 0, 1
+            for j in range(-1, 2):
+                if i == 0 and j == 0:
+                    continue
+                voisin_lig = lig + i
+                voisin_col = col + j
+                if 0 <= voisin_lig < grille_lignes and 0 <= voisin_col < grille_colonnes:
+                    if self.cells[voisin_lig][voisin_col].has_mine:
+                        mines += 1
+        return mines
