@@ -6,9 +6,10 @@ pygame.init() # Initialise tous les modules Pygame et Active les modules graphiq
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))#Crée la fenêtre de jeu avec les dimensions définies dans constants.py
 pygame.display.set_caption("Démineur")#Définit le titre de la fenêtre
 
-FLAG_IMG = pygame.image.load("images/flag.png")#Charge l'image du drapeau
+FLAG_IMG = pygame.image.load("d:\CI 3 ENSA\Modélisation de l'aide à la décision\Projet Démineur\DimineurGame\images/flag.png")#Charge l'image du drapeau
 FLAG_IMG = pygame.transform.scale(FLAG_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))  # Redimensionne l'image à 80% de la taille d'une cellule
-
+Mine_IMG=  pygame.image.load("d:\CI 3 ENSA\Modélisation de l'aide à la décision\Projet Démineur\DimineurGame\images/mine.png")
+Mine_IMG=  pygame.transform.scale(Mine_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))
 
 def dessiner_grille(screen, grille):
     for lig in range(grille_lignes):
@@ -24,8 +25,8 @@ def dessiner_grille(screen, grille):
                 screen.blit(FLAG_IMG, flag_rect)#blit() : Méthode PyGame pour copier une image sur une surface
             
             if cell.revealed:
-                pygame.draw.circle(screen, (255, 0, 0), rect.center, CELL_SIZE // 4)  # Cercle rouge pour la mine
-            pygame.draw.rect(screen, (1,2,3), rect, 1)# Dessine uniquement le contour du rectangle. et 1 indique l'épaisseur du trait.
+                Mine_rect = Mine_IMG.get_rect(center=rect.center) #Crée un rectangle de la taille de l'image et Centre ce rectangle sur le centre de la cellule
+                screen.blit(Mine_IMG, Mine_rect)
         
 
 def main():
