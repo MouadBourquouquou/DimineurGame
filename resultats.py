@@ -1,3 +1,7 @@
+from mines.mine import Mine
+from constants import grille_lignes, grille_colonnes
+
+
 def verifier_defaite(grille, ligne, colonne):
     cellule = grille.cells[ligne][colonne]
     
