@@ -29,7 +29,7 @@ class Grille:
 
         # Si c'est une mine, révéler toutes les mines
         if mine_revealed:
-            self.cells[lig][col].revealed = True
+            self.cells[lig][col].revealed = True #on marque la cellule (lig, col) où le joueur a cliqué comme étant révélée.
             # Révèle toutes les mines
             for mine in self.champ.mines:
                 self.cells[mine.x][mine.y].revealed = True
