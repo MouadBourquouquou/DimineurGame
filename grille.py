@@ -13,11 +13,18 @@ class Grille:
         self.cells = [[Cellule() for _ in range(grille_colonnes)] for _ in range(grille_lignes)]
         self.champ = None  # ChampDeMines, initialisé après le premier clic
         self.first_click = True  # Pour s'assurer que les mines ne sont générées qu'une seule fois
-    
+        self.flags_places = 0
     def put_flag(self, lig, col):
         if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes:
-            self.cells[lig][col].flagged = not self.cells[lig][col].flagged
-    
+            if not self.cells[lig][col].revealed :
+                cell = self.cells[lig][col]
+                if not cell.flagged and self.flags_places < MAX_FLAGS:
+                    cell.flagged = True
+                    self.flags_places += 1
+                elif cell.flagged:
+                    cell.flagged = False
+                    self.flags_places -= 1
+
     def reveal_cell(self, lig, col):
         # Si c'est le premier clic, générer les mines
         if self.first_click:

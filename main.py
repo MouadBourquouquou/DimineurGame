@@ -6,7 +6,7 @@ pygame.init() # Initialise tous les modules Pygame et Active les modules graphiq
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))#Crée la fenêtre de jeu avec les dimensions définies dans constants.py
 pygame.display.set_caption("Démineur")#Définit le titre de la fenêtre
 
-font = pygame.font.SysFont('Consolas', 30)
+font = pygame.font.SysFont('Consolas', 20)
 
 
 FLAG_IMG = pygame.image.load("images/flag.png")#Charge l'image du drapeau
@@ -42,6 +42,11 @@ def afficher_chrono(screen, temps_ms):
     # Fond pour le chrono
     pygame.draw.rect(screen, BG_COLOR, (SCREEN_WIDTH - 100, 10, 90, 30))
     screen.blit(chrono_surface, (SCREEN_WIDTH - 100, 10))
+def afficher_flags(screen, flags_restants):
+    color = RED if flags_restants <= 0 else BLACK  # Rouge si plus de flags disponibles
+    text = font.render(f"Flags: {flags_restants}/{MAX_FLAGS}", True, color)
+    pygame.draw.rect(screen, BG_COLOR, (10, 10, 120, 30))  # Agrandi pour accommoder le nouveau texte
+    screen.blit(text, (15, 10))
 
 def main():
     grille = Grille()# Création de l'objet Grille
@@ -51,6 +56,7 @@ def main():
 
     while running:
         temps_ecoule = pygame.time.get_ticks()-temps_debut
+
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:#fermeture de fenêtre
@@ -74,6 +80,7 @@ def main():
 
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
+        afficher_flags(screen, MAX_FLAGS - grille.flags_places)
 
         # Afficher le chrono seulement s'il est actif
         if jeu_demarre:

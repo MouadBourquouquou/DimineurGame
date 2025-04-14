@@ -14,3 +14,5 @@ BLACK = (0, 0, 0)
 
 # mines
 NUM_MINES = 50  # Augmenté pour plus de challenge
+
+MAX_FLAGS = 10  # Nombre maximum de drapeaux autorisés
