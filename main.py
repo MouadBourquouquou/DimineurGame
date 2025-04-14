@@ -1,7 +1,7 @@
 import pygame
 from constants import *
 from grille import Grille
-from resultats import fin_de_jeu
+from resultats import *
 
 
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
@@ -21,9 +21,9 @@ def dessiner_grille(screen, grille):
     for lig in range(grille_lignes):
         for col in range(grille_colonnes):
             x = col * CELL_SIZE 
-            y = lig * CELL_SIZE + 50  
+            y = lig * CELL_SIZE + 50
             cell = grille.cells[lig][col]
-            rect = pygame.Rect(col * CELL_SIZE, lig * CELL_SIZE + 50, CELL_SIZE - 1, CELL_SIZE - 1)
+            rect = pygame.Rect(x, y, CELL_SIZE - 1, CELL_SIZE - 1)
             color = (160, 160, 160) if cell.revealed else (100, 100, 100)
             pygame.draw.rect(screen, color, rect)  #  Dessine un rectangle plein (sans bordure)  //imane.
             pygame.draw.rect(screen, (0, 0, 0), rect, 1)
@@ -64,9 +64,16 @@ def main():
     running = True
     jeu_demarre = False
     temps_debut = 0
+    temps_final = 0
+    temps_ecoule = 0  # Déclare le temps écoulé ici
 
     while running:
-        temps_ecoule = pygame.time.get_ticks() - temps_debut if jeu_demarre else 0
+
+        
+
+         # Si le jeu est démarré, mettre à jour le temps écoulé
+        if jeu_demarre and not grille.game_over:
+            temps_ecoule = pygame.time.get_ticks() - temps_debut if jeu_demarre else 0
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -96,18 +103,24 @@ def main():
                         grille.reveal_cell(lig, col)
                         if grille.cells[lig][col].has_mine:  # Vérification défaite
                             grille.game_over = True
+                            temps_final = temps_ecoule  # Sauvegarder le temps du game over
 
         # Affichage
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
         
         # Chronomètre (si jeu démarré)
-        if jeu_demarre:
+        if jeu_demarre and not grille.game_over:
             afficher_chrono(screen, temps_ecoule)
-        
-        # Message de fin (défaite)
-        if grille.game_over:
-            afficher_message(screen, "Perdu !")
+        elif jeu_demarre and grille.game_over:
+            afficher_chrono(screen, temps_final)
+            if not grille.game_over:
+                afficher_message(screen, "Gagné !")
+            else:
+                afficher_message(screen, "Perdu !")
+    
+        else :
+            afficher_chrono(screen, temps_final)
 
         pygame.display.flip()
 

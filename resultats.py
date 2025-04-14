@@ -1,5 +1,6 @@
 from mines.mine import Mine
 from constants import grille_lignes, grille_colonnes
+from grille import *
 
 
 def verifier_defaite(grille, ligne, colonne):
@@ -20,7 +21,7 @@ def verifier_victoire(grille):
     return True
 
 def fin_de_jeu(grille, ligne, colonne):
-    if verifier_defaite(grille, ligne, colonne):
+    if grille.game_over:
         print("Oups ! Tu as perdu.")
     elif verifier_victoire(grille):
         print("Félicitations ! Tu as gagné.")

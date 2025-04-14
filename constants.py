@@ -1,7 +1,7 @@
 # dimensions
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
-CELL_SIZE = 25  # Taille plus grande pour meilleure visibilité
+CELL_SIZE = 25 # Taille plus grande pour meilleure visibilité
 grille_lignes = 9  #  lignes (hauteur)
 grille_colonnes = 9  #  colonnes (largeur)
 
@@ -13,4 +13,4 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
 # mines
-NUM_MINES = 50  # Augmenté pour plus de challenge
+NUM_MINES = 10  # Augmenté pour plus de challenge

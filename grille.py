@@ -24,7 +24,7 @@ class Grille:
         #  Gestion du premier clic : Initialisation du champ de mines
         if self.first_click:
             # Création du champ de mines avec dimensions et nombre de mines
-            self.champ = ChampDeMines(grille_lignes, 10)
+            self.champ = ChampDeMines(grille_lignes, NUM_MINES)
             # Génération des mines en évitant la cellule du premier clic (lig, col)
             self.champ.generer_mines((lig, col))
             # Marquage des cellules minées dans la grille
