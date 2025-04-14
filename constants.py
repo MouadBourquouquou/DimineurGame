@@ -13,4 +13,4 @@ RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 
 # mines
-NUM_MINES = 10  # Augmenté pour plus de challenge
+NUM_MINES = 50  # Augmenté pour plus de challenge

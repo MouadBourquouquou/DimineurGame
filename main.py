@@ -3,16 +3,16 @@ from constants import *
 from grille import Grille
 from resultats import *
 
-
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
+screen = pygame.display.set_mode(
+    (SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
 pygame.display.set_caption("Démineur")  # Définit le titre de la fenêtre
 
 font = pygame.font.SysFont('Consolas', 30)
 
-
 FLAG_IMG = pygame.image.load("images/flag.png")  # Charge l'image du drapeau
-FLAG_IMG = pygame.transform.scale(FLAG_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))  # Redimensionne l'image à 80% de la taille d'une cellule
+FLAG_IMG = pygame.transform.scale(FLAG_IMG, (
+int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))  # Redimensionne l'image à 80% de la taille d'une cellule
 Mine_IMG = pygame.image.load("images/mine.png")
 Mine_IMG = pygame.transform.scale(Mine_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))
 
@@ -20,14 +20,16 @@ Mine_IMG = pygame.transform.scale(Mine_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE
 def dessiner_grille(screen, grille):
     for lig in range(grille_lignes):
         for col in range(grille_colonnes):
+
             x = col * CELL_SIZE 
+            x = col * CELL_SIZE
             y = lig * CELL_SIZE + 50
             cell = grille.cells[lig][col]
             rect = pygame.Rect(x, y, CELL_SIZE - 1, CELL_SIZE - 1)
             color = (160, 160, 160) if cell.revealed else (100, 100, 100)
-            pygame.draw.rect(screen, color, rect)  #  Dessine un rectangle plein (sans bordure)  //imane.
+            pygame.draw.rect(screen, color, rect)  # Dessine un rectangle plein (sans bordure)  //imane.
             pygame.draw.rect(screen, (0, 0, 0), rect, 1)
-            
+
             if cell.revealed and not cell.has_mine:
                 mines_voisines = grille.compter_mines_voisines(lig, col)
                 if mines_voisines > 0:
@@ -52,12 +54,20 @@ def afficher_chrono(screen, temps_ms):
     # Fond pour le chrono
     pygame.draw.rect(screen, BG_COLOR, (SCREEN_WIDTH - 100, 10, 90, 30))
     screen.blit(chrono_surface, (SCREEN_WIDTH - 100, 10))
+
+
 def afficher_message(screen, message):
     font = pygame.font.SysFont(None, 40)
     text = font.render(message, True, (255, 0, 0))
     rect = text.get_rect(center=(screen.get_width() // 2, 25))
-    screen.blit(text, rect)  
+    screen.blit(text, rect)
 
+
+def afficher_flags(screen, flags_restants):
+    color = RED if flags_restants <= 0 else BLACK  # Rouge si plus de flags disponibles
+    text = font.render(f"Flags: {flags_restants}/{MAX_FLAGS}", True, color)
+    pygame.draw.rect(screen, BG_COLOR, (10, 10, 120, 30))  # Agrandi pour accommoder le nouveau texte
+    screen.blit(text, (5, 10))
 
 def main():
     grille = Grille()  # Initialisation de la grille
@@ -95,11 +105,11 @@ def main():
                         temps_debut = pygame.time.get_ticks()
 
                     # Clic droit : drapeau
-                    if event.button == 3:  
+                    if event.button == 3:
                         grille.put_flag(lig, col)
-                    
+
                     # Clic gauche : révélation
-                    elif event.button == 1:  
+                    elif event.button == 1:
                         grille.reveal_cell(lig, col)
                         if grille.cells[lig][col].has_mine:  # Vérification défaite
                             grille.game_over = True
@@ -108,10 +118,12 @@ def main():
         # Affichage
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
-        
+        afficher_flags(screen, MAX_FLAGS - grille.flags_places)
+
         # Chronomètre (si jeu démarré)
         if jeu_demarre and not grille.game_over:
             afficher_chrono(screen, temps_ecoule)
+
         elif jeu_demarre and grille.game_over:
             afficher_chrono(screen, temps_final)
             if not grille.game_over:
@@ -122,9 +134,14 @@ def main():
         else :
             afficher_chrono(screen, temps_final)
 
+        # Message de fin (défaite)
+        if grille.game_over:
+            afficher_message(screen, "Perdu !")
+
         pygame.display.flip()
 
     pygame.quit()
+
+
 if __name__ == "__main__":
     main()
-

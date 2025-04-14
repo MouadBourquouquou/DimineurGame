@@ -1,25 +1,33 @@
 import random
 from constants import *
 from mines.ChampMines import ChampDeMines
+
+
 class Cellule:
     def __init__(self):
         self.flagged = False  # Seul attribut nécessaire
         self.revealed = False  # Si la cellule a été révélée
-        self.has_mine = False # Si la cellule contient une mine
+        self.has_mine = False  # Si la cellule contient une mine
 
-        
 class Grille:
     def __init__(self):
         self.cells = [[Cellule() for _ in range(grille_colonnes)] for _ in range(grille_lignes)]
         self.champ = None  # ChampDeMines, initialisé après le premier clic
         self.first_click = True  # Pour s'assurer que les mines ne sont générées qu'une seule fois
-        self.game_over = False 
+        self.game_over = False
+        self.flags_places = 0
+
     def put_flag(self, lig, col):
         if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes:
-            self.cells[lig][col].flagged = not self.cells[lig][col].flagged
-    
-    
-                
+            if not self.cells[lig][col].revealed :
+                cell = self.cells[lig][col]
+                if not cell.flagged and self.flags_places < MAX_FLAGS:
+                    cell.flagged = True
+                    self.flags_places += 1
+                elif cell.flagged:
+                    cell.flagged = False
+                    self.flags_places -= 1
+
     def reveal_cell(self, lig, col):
         #  Gestion du premier clic : Initialisation du champ de mines
         if self.first_click:
@@ -30,10 +38,10 @@ class Grille:
             # Marquage des cellules minées dans la grille
             for mine in self.champ.mines:
                 self.cells[mine.x][mine.y].has_mine = True
-            self.first_click = False # Le jeu est maintenant initialisé
+            self.first_click = False  # Le jeu est maintenant initialisé
         #  Vérifications préalables
         if self.cells[lig][col].revealed or self.cells[lig][col].flagged:
-            return   # Ne rien faire si cellule déjà révélée ou marquée
+            return  # Ne rien faire si cellule déjà révélée ou marquée
         #  Gestion des cas après révélation
         if self.cells[lig][col].has_mine:
             # Case minée : fin du jeu
@@ -63,8 +71,9 @@ class Grille:
             for i in range(-1, 2):
                 for j in range(-1, 2):
                     if i != 0 or j != 0:  # Éviter la cellule actuelle
-                        self._reveal_recursive(lig + i, col + j) 
-    # Compte le nombre de mines voisines pour une cellule donnée
+                        self._reveal_recursive(lig + i, col + j)
+                        # Compte le nombre de mines voisines pour une cellule donnée
+
     # Cette méthode est appelée lorsque la cellule est révélée
     # et permet de savoir combien de mines sont autour d'elle     par Abdelghani Bensalih
     def compter_mines_voisines(self, lig, col):
