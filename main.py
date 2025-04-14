@@ -20,19 +20,26 @@ Mine_IMG = pygame.transform.scale(Mine_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE
 def dessiner_grille(screen, grille):
     for lig in range(grille_lignes):
         for col in range(grille_colonnes):
+            x = col * CELL_SIZE 
+            y = lig * CELL_SIZE + 50  
             cell = grille.cells[lig][col]
             rect = pygame.Rect(col * CELL_SIZE, lig * CELL_SIZE + 50, CELL_SIZE - 1, CELL_SIZE - 1)
+            color = (160, 160, 160) if cell.revealed else (100, 100, 100)
+            pygame.draw.rect(screen, color, rect)  #  Dessine un rectangle plein (sans bordure)  //imane.
+            pygame.draw.rect(screen, (0, 0, 0), rect, 1)
             
-            pygame.draw.rect(screen, GREY, rect)  # Dessine un rectangle plein (sans bordure).
-        
-            if cell.flagged:
-                # Centrer le drapeau dans la cellule
-                flag_rect = FLAG_IMG.get_rect(center=rect.center)  # Crée un rectangle de la taille de l'image et Centre ce rectangle sur le centre de la cellule
-                screen.blit(FLAG_IMG, flag_rect)  # blit() : Méthode PyGame pour copier une image sur une surface
-            
-            if cell.revealed:
-                Mine_rect = Mine_IMG.get_rect(center=rect.center)  # Crée un rectangle de la taille de l'image et Centre ce rectangle sur le centre de la cellule
-                screen.blit(Mine_IMG, Mine_rect)
+            if cell.revealed and not cell.has_mine:
+                mines_voisines = grille.compter_mines_voisines(lig, col)
+                if mines_voisines > 0:
+                    font = pygame.font.SysFont(None, 24)
+                    text = font.render(str(mines_voisines), True, (0, 0, 255))
+                    screen.blit(text, (x + 10, y + 5))
+
+            if cell.revealed and cell.has_mine:
+                screen.blit(pygame.transform.scale(Mine_IMG, (CELL_SIZE - 4, CELL_SIZE - 4)), (x + 2, y + 2))
+
+            if cell.flagged and not cell.revealed:
+                screen.blit(pygame.transform.scale(FLAG_IMG, (CELL_SIZE - 4, CELL_SIZE - 4)), (x + 2, y + 2))
 
 
 def afficher_chrono(screen, temps_ms):
@@ -45,48 +52,66 @@ def afficher_chrono(screen, temps_ms):
     # Fond pour le chrono
     pygame.draw.rect(screen, BG_COLOR, (SCREEN_WIDTH - 100, 10, 90, 30))
     screen.blit(chrono_surface, (SCREEN_WIDTH - 100, 10))
+def afficher_message(screen, message):
+    font = pygame.font.SysFont(None, 40)
+    text = font.render(message, True, (255, 0, 0))
+    rect = text.get_rect(center=(screen.get_width() // 2, 25))
+    screen.blit(text, rect)  
 
 
 def main():
-    grille = Grille()  # Création de l'objet Grille
+    grille = Grille()  # Initialisation de la grille
     running = True
     jeu_demarre = False
     temps_debut = 0
 
     while running:
-        temps_ecoule = pygame.time.get_ticks() - temps_debut
+        temps_ecoule = pygame.time.get_ticks() - temps_debut if jeu_demarre else 0
 
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:  # Fermeture de fenêtre
+            if event.type == pygame.QUIT:
                 running = False
 
-            x, y = pygame.mouse.get_pos()  # Une fonctionnalité essentielle de PyGame pour récupérer la position de la souris en pixel.
-            if y >= 50:
-                col = x // CELL_SIZE
-                lig = (y - 50) // CELL_SIZE  # Ajustement pour la grille décalée
+            # Gestion des événements souris
+            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION):
+                x, y = pygame.mouse.get_pos()
+                if y >= 50:  # Zone de la grille (en dessous du chrono)
+                    col = x // CELL_SIZE
+                    lig = (y - 50) // CELL_SIZE  # Ajustement pour l'offset vertical
 
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 3:  # Clic droit
-                if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes:
-                    grille.put_flag(lig, col)
-        
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Clic gauche
-                if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes:
-                    if not jeu_demarre:  # Détection pour démarrer le chrono
+            # Actions sur clic
+            if event.type == pygame.MOUSEBUTTONDOWN and y >= 50:
+                if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes and not grille.game_over:
+                    # Démarrer le jeu au premier clic valide
+                    if not jeu_demarre:
                         jeu_demarre = True
                         temps_debut = pygame.time.get_ticks()
-                    grille.reveal_cell(lig, col)  #  après un clic gauche (on révèle une cellule),
-                    fin_de_jeu(grille, lig, col)  # doit vérifier si le joueur a gagné ou perdu
 
+                    # Clic droit : drapeau
+                    if event.button == 3:  
+                        grille.put_flag(lig, col)
+                    
+                    # Clic gauche : révélation
+                    elif event.button == 1:  
+                        grille.reveal_cell(lig, col)
+                        if grille.cells[lig][col].has_mine:  # Vérification défaite
+                            grille.game_over = True
+
+        # Affichage
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
-
-        # Afficher le chrono seulement s'il est actif
+        
+        # Chronomètre (si jeu démarré)
         if jeu_demarre:
             afficher_chrono(screen, temps_ecoule)
+        
+        # Message de fin (défaite)
+        if grille.game_over:
+            afficher_message(screen, "Perdu !")
 
-        pygame.display.flip()  # Affiche tous ce qu'on crée dans la grille sur l'écran, il est essentiel 
+        pygame.display.flip()
 
-
+    pygame.quit()
 if __name__ == "__main__":
     main()
 
