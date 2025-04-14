@@ -1,7 +1,7 @@
 # dimensions
 SCREEN_WIDTH = 500
 SCREEN_HEIGHT = 500
-CELL_SIZE = 25  # Taille plus grande pour meilleure visibilité
+CELL_SIZE = 25 # Taille plus grande pour meilleure visibilité
 grille_lignes = 9  #  lignes (hauteur)
 grille_colonnes = 9  #  colonnes (largeur)
 
