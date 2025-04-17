@@ -11,8 +11,7 @@ pygame.display.set_caption("Démineur")  # Définit le titre de la fenêtre
 font = pygame.font.SysFont('Consolas', 30)
 
 FLAG_IMG = pygame.image.load("images/flag.png")  # Charge l'image du drapeau
-FLAG_IMG = pygame.transform.scale(FLAG_IMG, (
-int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))  # Redimensionne l'image à 80% de la taille d'une cellule
+FLAG_IMG = pygame.transform.scale(FLAG_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))  # Redimensionne l'image à 80% de la taille d'une cellule
 Mine_IMG = pygame.image.load("images/mine.png")
 Mine_IMG = pygame.transform.scale(Mine_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))
 
@@ -118,7 +117,7 @@ def main():
         # Affichage
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
-        afficher_flags(screen, MAX_FLAGS - grille.flags_places)
+        afficher_flags(screen, FLAG_IMG)
 
         # Chronomètre (si jeu démarré)
         if jeu_demarre and not grille.game_over:
@@ -134,9 +133,6 @@ def main():
         else :
             afficher_chrono(screen, temps_final)
 
-        # Message de fin (défaite)
-        if grille.game_over:
-            afficher_message(screen, "Perdu !")
 
         pygame.display.flip()
 

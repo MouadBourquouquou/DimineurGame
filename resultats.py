@@ -21,7 +21,7 @@ def verifier_victoire(grille):
     return True
 
 def fin_de_jeu(grille, ligne, colonne):
-    if grille.game_over:
+    if verifier_defaite(grille, ligne, colonne):
         print("Oups ! Tu as perdu.")
     elif verifier_victoire(grille):
         print("Félicitations ! Tu as gagné.")
