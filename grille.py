@@ -31,17 +31,23 @@ class Grille:
     def reveal_cell(self, lig, col):
         #  Gestion du premier clic : Initialisation du champ de mines
         if self.first_click:
-            self.champ = ChampDeMines(grille_lignes, 10)  # Taille de la grille et nombre de mines
-            self.champ.generer_mines((lig, col))  # Ne pas placer de mine sur le premier clic
-            self.first_click = False
-
-        # Vérifie si la cellule contient une mine
-        mine_revealed = self.champ.reveler(lig, col)
-
-        # Si c'est une mine, révéler toutes les mines
-        if mine_revealed:
+            # Création du champ de mines avec dimensions et nombre de mines
+            self.champ = ChampDeMines(grille_lignes, 10)
+            # Génération des mines en évitant la cellule du premier clic (lig, col)
+            self.champ.generer_mines((lig, col))
+            # Marquage des cellules minées dans la grille
+            for mine in self.champ.mines:
+                self.cells[mine.x][mine.y].has_mine = True
+            self.first_click = False  # Le jeu est maintenant initialisé
+        #  Vérifications préalables
+        if self.cells[lig][col].revealed or self.cells[lig][col].flagged:
+            return  # Ne rien faire si cellule déjà révélée ou marquée
+        #  Gestion des cas après révélation
+        if self.cells[lig][col].has_mine:
+            # Case minée : fin du jeu
             self.cells[lig][col].revealed = True
-            # Révèle toutes les mines
+            # Révélation de toutes les mines (affichage)
+            self.game_over = True
             for mine in self.champ.mines:
                 self.cells[mine.x][mine.y].revealed = True
         else:
