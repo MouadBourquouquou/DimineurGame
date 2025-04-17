@@ -117,7 +117,7 @@ def main():
         # Affichage
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
-        afficher_flags(screen, FLAG_IMG)
+        afficher_flags(screen, MAX_FLAGS - grille.flags_places)
 
         # Chronomètre (si jeu démarré)
         if jeu_demarre and not grille.game_over:
