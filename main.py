@@ -1,8 +1,7 @@
 import pygame
 from constants import *
 from grille import Grille
-from resultats import fin_de_jeu
-
+# from resultats import fin_de_jeu
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
 screen = pygame.display.set_mode(
     (SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
@@ -18,8 +17,8 @@ Mine_IMG = pygame.transform.scale(Mine_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE
 
 
 def dessiner_grille(screen, grille):
-    for lig in range(grille_lignes):
-        for col in range(grille_colonnes):
+    for lig in range(grille.grille_lignes):
+        for col in range(grille.grille_colonnes):
             x = col * CELL_SIZE
             y = lig * CELL_SIZE + 50
             cell = grille.cells[lig][col]
@@ -61,20 +60,53 @@ def afficher_message(screen, message):
     screen.blit(text, rect)
 
 
-def afficher_flags(screen, flags_restants):
+def afficher_flags(screen, flags_restants,total_flags):
     color = RED if flags_restants <= 0 else BLACK  # Rouge si plus de flags disponibles
-    text = font.render(f"Flags: {flags_restants}/{MAX_FLAGS}", True, color)
+    text = font.render(f"Flags: {flags_restants}/{total_flags}", True, color)
     pygame.draw.rect(screen, BG_COLOR, (10, 10, 120, 30))  # Agrandi pour accommoder le nouveau texte
     screen.blit(text, (5, 10))
 
 def main():
-    grille = Grille()  # Initialisation de la grille
-    running = True
+    start = True
+    play = False
     jeu_demarre = False
     temps_debut = 0
     temps_ecoule = 0
-
-    while running:
+    grille_lignes, grille_colonnes, num_mines = 0,0,0
+    while start:
+        #dessiner la page d'accueil avec 3 niveaux de difficulté
+        screen.fill(BG_COLOR)
+        font = pygame.font.SysFont('Consolas', 50)
+        title_text = font.render("Démineur", True, BLACK)
+        title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+        screen.blit(title_text, title_rect)
+        font = pygame.font.SysFont('Consolas', 30)
+        easy_text = font.render("Facile", True, BLACK)
+        easy_rect = easy_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+        screen.blit(easy_text, easy_rect)
+        medium_text = font.render("Moyen", True, BLACK)
+        medium_rect = medium_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
+        screen.blit(medium_text, medium_rect)
+        hard_text = font.render("Difficile", True, BLACK)
+        hard_rect = hard_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+        screen.blit(hard_text, hard_rect)
+        pygame.display.flip()
+        for event in pygame.event.get():
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = pygame.mouse.get_pos()
+                if easy_rect.collidepoint(x, y): 
+                    grille_lignes, grille_colonnes, num_mines = 9, 9, 10
+                    play = True
+                elif medium_rect.collidepoint(x, y):
+                    grille_lignes, grille_colonnes, num_mines = 14, 14, 30
+                    play = True
+                elif hard_rect.collidepoint(x, y):
+                    grille_lignes, grille_colonnes, num_mines = 16, 16, 50
+                    play = True
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                start = False
+    grille = Grille(grille_lignes,grille_colonnes,num_mines)  # Initialisation de la grille
+    while play:
         if jeu_demarre and not grille.game_over:
             temps_ecoule = pygame.time.get_ticks() - temps_debut if jeu_demarre else 0
 
@@ -110,7 +142,7 @@ def main():
         # Affichage
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
-        afficher_flags(screen, MAX_FLAGS - grille.flags_places)
+        afficher_flags(screen, grille.num_mines - grille.flags_places,grille.num_mines)
 
         # Chronomètre (si jeu démarré)
         if jeu_demarre:

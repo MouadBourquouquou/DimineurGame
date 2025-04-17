@@ -13,7 +13,16 @@ class ChampDeMines:
             (x, y)
             for x in range(self.taille)
             for y in range(self.taille)
-            if (x, y) != premier_clic
+            # Éviter la case du premier clic et les cases adjacentes
+            if not (x == premier_clic[0] and y == premier_clic[1]) and
+            not (x == premier_clic[0] + 1 and y == premier_clic[1]) and
+            not (x == premier_clic[0] and y == premier_clic[1] + 1) and
+            not (x == premier_clic[0] + 1 and y == premier_clic[1] + 1) and
+            not (x == premier_clic[0] - 1 and y == premier_clic[1] + 1) and
+            not (x == premier_clic[0] - 1 and y == premier_clic[1] - 1) and
+            not (x == premier_clic[0] and y == premier_clic[1] - 1) and
+            not (x == premier_clic[0] -1 and y == premier_clic[1] ) and
+            not (x == premier_clic[0] + 1 and y == premier_clic[1] -1 ) 
         ]
         positions = random.sample(positions_possibles, self.nb_mines)
         self.mines = [Mine(x, y) for (x, y) in positions]
