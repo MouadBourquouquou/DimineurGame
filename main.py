@@ -4,8 +4,9 @@ from grille import Grille
 # from resultats import fin_de_jeu
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
-pygame.display.set_caption("Démineur")  # Définit le titre de la fenêtre
 
+pygame.display.set_caption("Démineur")  # Définit le titre de la fenêtre
+pygame.display.set_icon(pygame.image.load("images/bombe.png"))
 font = pygame.font.SysFont('Consolas', 30)
 
 FLAG_IMG = pygame.image.load("images/flag.png")  # Charge l'image du drapeau
