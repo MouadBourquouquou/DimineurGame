@@ -120,7 +120,7 @@ def main():
     temps_debut = 0
     temps_ecoule = 0
     grille_lignes, grille_colonnes, num_mines = 0,0,0
-    clicks = 0
+    clicks = 1
     revealed = 0
     start_time = 0
     show_stats = False
@@ -153,14 +153,16 @@ def main():
                 if easy_rect.collidepoint(x, y): 
                     grille_lignes, grille_colonnes, num_mines = 9, 9, 10
                     play = True
+                    start = False
                 elif medium_rect.collidepoint(x, y):
                     grille_lignes, grille_colonnes, num_mines = 14, 14, 30
                     play = True
+                    start = False
                 elif hard_rect.collidepoint(x, y):
                     grille_lignes, grille_colonnes, num_mines = 16, 16, 50
                     play = True
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                start = False
+                    start = False
+            
     grille = Grille(grille_lignes,grille_colonnes,num_mines)  # Initialisation de la grille
     while play:
         if jeu_demarre and not grille.game_over:
@@ -168,7 +170,6 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                start = False
                 pygame.quit()
                 return
 
@@ -215,11 +216,12 @@ def main():
                     show_stats = handle_stats_screen(screen, grille, stats_data)
                     if not show_stats:
                         play = False  # Retour au menu
-                else:
-                    # Affichage normal du jeu
-                    screen.fill(BG_COLOR)
-                    dessiner_grille(screen, grille)
-                    afficher_flags(screen, grille.num_mines - grille.flags_places, grille.num_mines)# Chronomètre (si jeu démarré)
+                  
+        # Affichage
+        screen.fill(BG_COLOR)
+        dessiner_grille(screen, grille)
+        afficher_flags(screen, grille.num_mines - grille.flags_places,grille.num_mines)
+
         if jeu_demarre:
             afficher_chrono(screen, temps_ecoule)
 
