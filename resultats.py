@@ -1,5 +1,4 @@
 from mines.mine import Mine
-from constants import grille_lignes, grille_colonnes
 from grille import *
 
 def verifier_defaite(grille, ligne, colonne):
@@ -10,13 +9,14 @@ def verifier_defaite(grille, ligne, colonne):
         return True  # visible = True, cela signifie que la mine a été révélée.
     return False
 
-def verifier_victoire(grille):
+def verifier_victoire(grille,grille_lignes,grille_colonnes):
     for lig in range(grille_lignes):
         for col in range(grille_colonnes):
             cellule = grille.cells[lig][col]
             # Si la cellule n'est pas une mine et n'est pas révélée
-            if not isinstance(cellule, Mine) and not cellule.revealed:  # revealed est un attribut de la classe Cellule qui indique si une cellule a été révélée ou non.
+            if not cellule.has_mine and not cellule.revealed:
                 return False
+    grille.victoire = True
     return True
 
 def fin_de_jeu(grille, ligne, colonne):

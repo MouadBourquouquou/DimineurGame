@@ -19,6 +19,7 @@ class Grille:
         self.grille_lignes = grille_lignes
         self.grille_colonnes = grille_colonnes
         self.num_mines = num_mines
+        self.victoire = False
 
     def put_flag(self, lig, col):
         if 0 <= lig < self.grille_lignes and 0 <= col < self.grille_colonnes:

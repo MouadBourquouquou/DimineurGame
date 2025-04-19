@@ -1,10 +1,9 @@
 import pygame
-from constants import *
+from resultats import *
 from grille import Grille
 # from resultats import fin_de_jeu
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
-screen = pygame.display.set_mode(
-    (SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
 pygame.display.set_caption("Démineur")  # Définit le titre de la fenêtre
 
 font = pygame.font.SysFont('Consolas', 30)
@@ -15,6 +14,8 @@ int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))  # Redimensionne l'image à 80% de 
 Mine_IMG = pygame.image.load("images/mine.png")
 Mine_IMG = pygame.transform.scale(Mine_IMG, (int(CELL_SIZE * 0.8), int(CELL_SIZE * 0.8)))
 
+BG_COLOR = (10, 25, 47)  # Bleu nuit
+
 
 def dessiner_grille(screen, grille):
     for lig in range(grille.grille_lignes):
@@ -23,8 +24,9 @@ def dessiner_grille(screen, grille):
             y = lig * CELL_SIZE + 50
             cell = grille.cells[lig][col]
             rect = pygame.Rect(col * CELL_SIZE, lig * CELL_SIZE + 50, CELL_SIZE - 1, CELL_SIZE - 1)
+
             color = (160, 160, 160) if cell.revealed else (100, 100, 100)
-            pygame.draw.rect(screen, color, rect)  # Dessine un rectangle plein (sans bordure)  //imane.
+            pygame.draw.rect(screen, color, rect)
             pygame.draw.rect(screen, (0, 0, 0), rect, 1)
 
             if cell.revealed and not cell.has_mine:
@@ -50,7 +52,7 @@ def afficher_chrono(screen, temps_ms):
 
     # Fond pour le chrono
     pygame.draw.rect(screen, BG_COLOR, (SCREEN_WIDTH - 100, 10, 90, 30))
-    screen.blit(chrono_surface, (SCREEN_WIDTH - 100, 10))
+    screen.blit(chrono_surface, (SCREEN_WIDTH - 90, 10))
 
 
 def afficher_message(screen, message):
@@ -66,6 +68,51 @@ def afficher_flags(screen, flags_restants,total_flags):
     pygame.draw.rect(screen, BG_COLOR, (10, 10, 120, 30))  # Agrandi pour accommoder le nouveau texte
     screen.blit(text, (5, 10))
 
+
+def afficher_stats(screen, temps_ecoule, clicks, efficacite, resultat):
+    panel_rect = pygame.Rect(50, SCREEN_HEIGHT - 150, SCREEN_WIDTH - 100, 100)
+    pygame.draw.rect(screen, (20, 40, 70), panel_rect, border_radius=10)
+    pygame.draw.rect(screen, (255, 255, 255), panel_rect, 2, border_radius=10)
+
+    stats_font = pygame.font.SysFont('Arial', 20)
+    y = panel_rect.y + 10
+
+    stats = [
+        f"Temps: {temps_ecoule / 1000:.3f} sec",
+        f"Clics: {clicks}",
+        f"Efficacité: {efficacite:.0f}%"
+    ]
+
+    for stat in stats:
+        text = stats_font.render(stat, True, (255, 255, 255))
+        screen.blit(text, (panel_rect.x + 20, y))
+        y += 25
+
+    result_font = pygame.font.SysFont('Arial', 24, bold=True)
+    result_color = (0, 255, 0) if "VICTOIRE" in resultat else (255, 0, 0)
+    result_text = result_font.render(resultat, True, result_color)
+    screen.blit(result_text, (panel_rect.centerx, panel_rect.y + 10))
+
+
+def handle_stats_screen(screen, grille, stats_data):
+    screen.fill(BG_COLOR)
+    dessiner_grille(screen, grille)
+    afficher_flags(screen, grille.num_mines - grille.flags_places, grille.num_mines)
+    afficher_chrono(screen, stats_data['time'])
+    afficher_stats(screen, stats_data['time'], stats_data['clicks'], stats_data['efficiency'], stats_data['result'])
+    pygame.display.flip()
+
+    waiting = True
+    while waiting:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                waiting = False
+                pygame.quit()
+                return False
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                waiting = False
+    return False
+
 def main():
     start = True
     play = False
@@ -73,6 +120,11 @@ def main():
     temps_debut = 0
     temps_ecoule = 0
     grille_lignes, grille_colonnes, num_mines = 0,0,0
+    clicks = 0
+    revealed = 0
+    start_time = 0
+    show_stats = False
+
     while start:
         #dessiner la page d'accueil avec 3 niveaux de difficulté
         screen.fill(BG_COLOR)
@@ -92,6 +144,10 @@ def main():
         screen.blit(hard_text, hard_rect)
         pygame.display.flip()
         for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
                 if easy_rect.collidepoint(x, y): 
@@ -112,7 +168,9 @@ def main():
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
+                start = False
+                pygame.quit()
+                return
 
             # Gestion des événements souris
             if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION):
@@ -132,25 +190,38 @@ def main():
                     # Clic droit : drapeau
                     if event.button == 3:
                         grille.put_flag(lig, col)
+                        clicks += 1
+
 
                     # Clic gauche : révélation
                     elif event.button == 1:
                         grille.reveal_cell(lig, col)
+                        clicks+=1
+                        revealed +=1
                         if grille.cells[lig][col].has_mine:  # Vérification défaite
                             grille.game_over = True
+                # Gestion de l'affichage
+                if grille.game_over or verifier_victoire(grille,grille_lignes,grille_colonnes):
 
-        # Affichage
-        screen.fill(BG_COLOR)
-        dessiner_grille(screen, grille)
-        afficher_flags(screen, grille.num_mines - grille.flags_places,grille.num_mines)
+                    efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
+                    stats_data = {
+                        'time': temps_ecoule,
+                        'clicks': clicks,
+                        'efficiency': efficacite,
+                        'result': "VICTOIRE !" if grille.victoire else "PERDU !",
+                        'grille': grille
+                    }
 
-        # Chronomètre (si jeu démarré)
+                    show_stats = handle_stats_screen(screen, grille, stats_data)
+                    if not show_stats:
+                        play = False  # Retour au menu
+                else:
+                    # Affichage normal du jeu
+                    screen.fill(BG_COLOR)
+                    dessiner_grille(screen, grille)
+                    afficher_flags(screen, grille.num_mines - grille.flags_places, grille.num_mines)# Chronomètre (si jeu démarré)
         if jeu_demarre:
             afficher_chrono(screen, temps_ecoule)
-
-        # Message de fin (défaite)
-        if grille.game_over:
-            afficher_message(screen, "Perdu !")
 
         pygame.display.flip()
 
