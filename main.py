@@ -115,6 +115,40 @@ def handle_stats_screen(screen, grille, stats_data):
     return False
 
 def main():
+    def main():
+    # État pour la page d'accueil
+    show_welcome = True
+    
+    while show_welcome:
+        # Dessiner la page d'accueil
+        screen.fill(BG_COLOR)
+        
+        # Titre
+        welcome_font = pygame.font.SysFont('Consolas', 60)
+        welcome_text = welcome_font.render("DÉMINEUR", True, BLACK)
+        welcome_rect = welcome_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//3))
+        screen.blit(welcome_text, welcome_rect)
+        
+        # Bouton Start
+        start_font = pygame.font.SysFont('Consolas', 30)
+        start_text = start_font.render("START", True, BLACK)
+        start_rect = start_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+        pygame.draw.rect(screen, (100, 100, 100), (SCREEN_WIDTH//2-70, SCREEN_HEIGHT//2-25, 140, 50))
+        screen.blit(start_text, start_rect)
+        
+        pygame.display.flip()
+        
+        # Gestion des événements
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                return
+            
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if SCREEN_WIDTH//2-70 <= mouse_pos[0] <= SCREEN_WIDTH//2+70 and \
+                   SCREEN_HEIGHT//2-25 <= mouse_pos[1] <= SCREEN_HEIGHT//2+25:
+                    show_welcome = False
     start = True
     play = False
     jeu_demarre = False
