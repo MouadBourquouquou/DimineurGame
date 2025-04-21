@@ -115,7 +115,6 @@ def handle_stats_screen(screen, grille, stats_data):
     return False
 
 def main():
-    def main():
     # État pour la page d'accueil
     show_welcome = True
     
