@@ -115,7 +115,6 @@ def handle_stats_screen(screen, grille, stats_data):
     return False
 
 def main():
-    def main():
     # État pour la page d'accueil
     show_welcome = True
     
@@ -159,6 +158,7 @@ def main():
     revealed = 0
     start_time = 0
     show_stats = False
+    cell_flagged=False
 
     while start:
         #dessiner la page d'accueil avec 3 niveaux de difficulté
@@ -227,15 +227,17 @@ def main():
                     if event.button == 3:
                         grille.put_flag(lig, col)
                         clicks += 1
+                        cell_flagged= True
 
 
                     # Clic gauche : révélation
                     elif event.button == 1:
-                        grille.reveal_cell(lig, col)
-                        clicks+=1
-                        revealed +=1
-                        if grille.cells[lig][col].has_mine:  # Vérification défaite
-                            grille.game_over = True
+                        if not grille.cells[lig][col].flagged:  
+                            if grille.reveal_cell(lig, col):
+                                clicks+=1
+                                revealed +=1
+                            if grille.cells[lig][col].has_mine:  # Vérification défaite
+                                grille.game_over = True
                 # Gestion de l'affichage
                 if grille.game_over or verifier_victoire(grille,grille_lignes,grille_colonnes):
 
