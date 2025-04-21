@@ -158,7 +158,6 @@ def main():
     revealed = 0
     start_time = 0
     show_stats = False
-    cell_flagged=False
 
     while start:
         #dessiner la page d'accueil avec 3 niveaux de difficulté
@@ -227,12 +226,11 @@ def main():
                     if event.button == 3:
                         grille.put_flag(lig, col)
                         clicks += 1
-                        cell_flagged= True
 
 
                     # Clic gauche : révélation
                     elif event.button == 1:
-                        if not grille.cells[lig][col].flagged:  
+                        if not grille.cells[lig][col].flagged:  # On bloque si la case est flaguée
                             if grille.reveal_cell(lig, col):
                                 clicks+=1
                                 revealed +=1
