@@ -94,25 +94,53 @@ def afficher_stats(screen, temps_ecoule, clicks, efficacite, resultat):
     result_text = result_font.render(resultat, True, result_color)
     screen.blit(result_text, (panel_rect.centerx, panel_rect.y + 10))
 
+def draw_control_buttons():
+    """Dessine les boutons de contrôle en bas de l'écran (texte seulement)"""
+    # Bouton Quit (texte seulement)
+    quit_text = font.render("Quit", True, WHITE)
+    screen.blit(quit_text, (30, SCREEN_HEIGHT - 45))
+    
+    # Bouton Restart (texte seulement)
+    restart_text = font.render("Restart", True, WHITE)
+    screen.blit(restart_text, (SCREEN_WIDTH//2 - 40, SCREEN_HEIGHT - 45))
+    
+    # Bouton Menu (texte seulement)
+    menu_text = font.render("Menu", True, WHITE)
+    screen.blit(menu_text, (SCREEN_WIDTH - 90, SCREEN_HEIGHT - 45))
 
+def check_button_click(pos):
+    """Vérifie quel bouton a été cliqué (zones approximatives autour du texte)"""
+    x, y = pos
+    
+    # Zones cliquables approximatives (adaptez selon la taille de votre texte)
+    if 10 <= x <= 110 and SCREEN_HEIGHT - 50 <= y <= SCREEN_HEIGHT - 10:  # Quit
+        return "quit"
+    if SCREEN_WIDTH//2 - 50 <= x <= SCREEN_WIDTH//2 + 50 and SCREEN_HEIGHT - 50 <= y <= SCREEN_HEIGHT - 10:  # Restart
+        return "restart"
+    if SCREEN_WIDTH - 110 <= x <= SCREEN_WIDTH - 10 and SCREEN_HEIGHT - 50 <= y <= SCREEN_HEIGHT - 10:  # Menu
+        return "menu"
+    
+    return None
 def handle_stats_screen(screen, grille, stats_data):
     screen.fill(BG_COLOR)
     dessiner_grille(screen, grille)
     afficher_flags(screen, grille.num_mines - grille.flags_places, grille.num_mines)
     afficher_chrono(screen, stats_data['time'])
     afficher_stats(screen, stats_data['time'], stats_data['clicks'], stats_data['efficiency'], stats_data['result'])
+        
+    draw_control_buttons()
     pygame.display.flip()
 
     waiting = True
     while waiting:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                waiting = False
-                pygame.quit()
-                return False
+                return "quit"
             if event.type == pygame.MOUSEBUTTONDOWN:
-                waiting = False
-    return False
+                action = check_button_click(event.pos)
+                if action:
+                    return action
+    return None
 
 def main():
     # État pour la page d'accueil
@@ -198,69 +226,99 @@ def main():
                     start = False
             
     grille = Grille(grille_lignes,grille_colonnes,num_mines)  # Initialisation de la grille
+    jeu_demarre = False
+    temps_debut = 0
+    temps_ecoule = 0
+    clicks = 1
+    revealed = 0
+    play = True
+
+    # Boucle principale du jeu
     while play:
         if jeu_demarre and not grille.game_over:
-            temps_ecoule = pygame.time.get_ticks() - temps_debut if jeu_demarre else 0
+            temps_ecoule = pygame.time.get_ticks() - temps_debut
+
+        screen.fill(BG_COLOR)
+        dessiner_grille(screen, grille)
+        afficher_flags(screen, grille.num_mines - grille.flags_places, grille.num_mines)
+        
+        if jeu_demarre:
+            afficher_chrono(screen, temps_ecoule)
+        
+        draw_control_buttons()
+        pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 return
-
-            # Gestion des événements souris
-            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION):
+                
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                # Vérifier les boutons de contrôle
+                action = check_button_click(event.pos)
+                if action == "quit":
+                    pygame.quit()
+                    return
+                elif action == "restart":
+                    grille = Grille(grille_lignes, grille_colonnes, num_mines)
+                    jeu_demarre = False
+                    temps_debut = 0
+                    temps_ecoule = 0
+                    clicks = 1
+                    revealed = 0
+                    continue
+                elif action == "menu":
+                    play = False
+                    main()  # Retour au menu principal
+                    return
+                
+                # Gestion des clics sur la grille
                 x, y = pygame.mouse.get_pos()
-                if y >= 50:  # Zone de la grille (en dessous du chrono)
+                if y >= 50:
                     col = x // CELL_SIZE
-                    lig = (y - 50) // CELL_SIZE  # Ajustement pour l'offset vertical
-
-            # Actions sur clic
-            if event.type == pygame.MOUSEBUTTONDOWN and y >= 50:
-                if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes and not grille.game_over:
-                    # Démarrer le jeu au premier clic valide
-                    if not jeu_demarre:
-                        jeu_demarre = True
-                        temps_debut = pygame.time.get_ticks()
-
-                    # Clic droit : drapeau
-                    if event.button == 3:
-                        grille.put_flag(lig, col)
-                        clicks += 1
-
-
-                    # Clic gauche : révélation
-                    elif event.button == 1:
-                        if not grille.cells[lig][col].flagged:  # On bloque si la case est flaguée
-                            if grille.reveal_cell(lig, col):
-                                clicks+=1
-                                revealed +=1
-                            if grille.cells[lig][col].has_mine:  # Vérification défaite
+                    lig = (y - 50) // CELL_SIZE
+                    
+                    if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes and not grille.game_over:
+                        if not jeu_demarre:
+                            jeu_demarre = True
+                            temps_debut = pygame.time.get_ticks()
+                            
+                        if event.button == 3:  # Clic droit
+                            grille.put_flag(lig, col)
+                            clicks += 1
+                        elif event.button == 1:  # Clic gauche
+                            grille.reveal_cell(lig, col)
+                            clicks += 1
+                            revealed += 1
+                            if grille.cells[lig][col].has_mine:
                                 grille.game_over = True
-                # Gestion de l'affichage
-                if grille.game_over or verifier_victoire(grille,grille_lignes,grille_colonnes):
 
-                    efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
-                    stats_data = {
-                        'time': temps_ecoule,
-                        'clicks': clicks,
-                        'efficiency': efficacite,
-                        'result': "VICTOIRE !" if grille.victoire else "PERDU !",
-                        'grille': grille
-                    }
-
-                    show_stats = handle_stats_screen(screen, grille, stats_data)
-                    if not show_stats:
-                        play = False  # Retour au menu
-                  
-        # Affichage
-        screen.fill(BG_COLOR)
-        dessiner_grille(screen, grille)
-        afficher_flags(screen, grille.num_mines - grille.flags_places,grille.num_mines)
-
-        if jeu_demarre:
-            afficher_chrono(screen, temps_ecoule)
-
-        pygame.display.flip()
+        # Vérifier fin de partie
+        if grille.game_over or verifier_victoire(grille, grille_lignes, grille_colonnes):
+            efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
+            stats_data = {
+                'time': temps_ecoule,
+                'clicks': clicks,
+                'efficiency': efficacite,
+                'result': "VICTOIRE !" if grille.victoire else "PERDU !",
+                'grille': grille
+            }
+            
+            action = handle_stats_screen(screen, grille, stats_data)
+            if action == "quit":
+                pygame.quit()
+                return
+            elif action == "restart":
+                grille = Grille(grille_lignes, grille_colonnes, num_mines)
+                jeu_demarre = False
+                temps_debut = 0
+                temps_ecoule = 0
+                clicks = 1
+                revealed = 0
+            elif action == "menu":
+                play = False
+                main()
+                return
 
     pygame.quit()
 
