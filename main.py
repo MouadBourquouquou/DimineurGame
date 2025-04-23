@@ -287,12 +287,12 @@ def main():
                             grille.put_flag(lig, col)
                             clicks += 1
                         elif event.button == 1:  # Clic gauche
-                            grille.reveal_cell(lig, col)
-                            clicks += 1
-                            revealed += 1
-                            if grille.cells[lig][col].has_mine:
-                                grille.game_over = True
-
+                            if not grille.cells[lig][col].flagged:
+                                if grille.reveal_cell(lig, col):
+                                    clicks += 1
+                                    revealed += 1
+                                    if grille.cells[lig][col].has_mine:
+                                        grille.game_over = True
         # Vérifier fin de partie
         if grille.game_over or verifier_victoire(grille, grille_lignes, grille_colonnes):
             efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
