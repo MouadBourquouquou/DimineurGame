@@ -179,8 +179,6 @@ def main():
     start = True
     play = False
     jeu_demarre = False
-    temps_debut = 0
-    temps_ecoule = 0
     grille_lignes, grille_colonnes, num_mines = 0,0,0
     clicks = 1
     revealed = 0
