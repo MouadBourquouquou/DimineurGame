@@ -2,6 +2,7 @@ import pygame
 from resultats import *
 from grille import Grille
 # from resultats import fin_de_jeu
+
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
 
@@ -115,154 +116,153 @@ def handle_stats_screen(screen, grille, stats_data):
     return False
 
 def main():
-    def main():
-    # État pour la page d'accueil
-    show_welcome = True
-    
-    while show_welcome:
-        # Dessiner la page d'accueil
-        screen.fill(BG_COLOR)
-        
-        # Titre
-        welcome_font = pygame.font.SysFont('Consolas', 60)
-        welcome_text = welcome_font.render("DÉMINEUR", True, BLACK)
-        welcome_rect = welcome_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//3))
-        screen.blit(welcome_text, welcome_rect)
-        
-        # Bouton Start
-        start_font = pygame.font.SysFont('Consolas', 30)
-        start_text = start_font.render("START", True, BLACK)
-        start_rect = start_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
-        pygame.draw.rect(screen, (100, 100, 100), (SCREEN_WIDTH//2-70, SCREEN_HEIGHT//2-25, 140, 50))
-        screen.blit(start_text, start_rect)
-        
-        pygame.display.flip()
-        
-        # Gestion des événements
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
-            
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if SCREEN_WIDTH//2-70 <= mouse_pos[0] <= SCREEN_WIDTH//2+70 and \
-                   SCREEN_HEIGHT//2-25 <= mouse_pos[1] <= SCREEN_HEIGHT//2+25:
-                    show_welcome = False
-    start = True
-    play = False
-    jeu_demarre = False
-    temps_debut = 0
-    temps_ecoule = 0
-    grille_lignes, grille_colonnes, num_mines = 0,0,0
-    clicks = 1
-    revealed = 0
-    start_time = 0
-    show_stats = False
+        # État pour la page d'accueil
+        show_welcome = True
 
-    while start:
-        #dessiner la page d'accueil avec 3 niveaux de difficulté
-        screen.fill(BG_COLOR)
-        font = pygame.font.SysFont('Consolas', 50)
-        title_text = font.render("Démineur", True, BLACK)
-        title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
-        screen.blit(title_text, title_rect)
-        font = pygame.font.SysFont('Consolas', 30)
-        easy_text = font.render("Facile", True, BLACK)
-        easy_rect = easy_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
-        screen.blit(easy_text, easy_rect)
-        medium_text = font.render("Moyen", True, BLACK)
-        medium_rect = medium_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
-        screen.blit(medium_text, medium_rect)
-        hard_text = font.render("Difficile", True, BLACK)
-        hard_rect = hard_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
-        screen.blit(hard_text, hard_rect)
-        pygame.display.flip()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
+        while show_welcome:
+            # Dessiner la page d'accueil
+            screen.fill(BG_COLOR)
 
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                x, y = pygame.mouse.get_pos()
-                if easy_rect.collidepoint(x, y): 
-                    grille_lignes, grille_colonnes, num_mines = 9, 9, 10
-                    play = True
-                    start = False
-                elif medium_rect.collidepoint(x, y):
-                    grille_lignes, grille_colonnes, num_mines = 14, 14, 30
-                    play = True
-                    start = False
-                elif hard_rect.collidepoint(x, y):
-                    grille_lignes, grille_colonnes, num_mines = 16, 16, 50
-                    play = True
-                    start = False
-            
-    grille = Grille(grille_lignes,grille_colonnes,num_mines)  # Initialisation de la grille
-    while play:
-        if jeu_demarre and not grille.game_over:
-            temps_ecoule = pygame.time.get_ticks() - temps_debut if jeu_demarre else 0
+            # Titre
+            welcome_font = pygame.font.SysFont('Consolas', 60)
+            welcome_text = welcome_font.render("DÉMINEUR", True, BLACK)
+            welcome_rect = welcome_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//3))
+            screen.blit(welcome_text, welcome_rect)
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                return
+            # Bouton Start
+            start_font = pygame.font.SysFont('Consolas', 30)
+            start_text = start_font.render("START", True, BLACK)
+            start_rect = start_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
+            pygame.draw.rect(screen, (100, 100, 100), (SCREEN_WIDTH//2-70, SCREEN_HEIGHT//2-25, 140, 50))
+            screen.blit(start_text, start_rect)
 
-            # Gestion des événements souris
-            if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION):
-                x, y = pygame.mouse.get_pos()
-                if y >= 50:  # Zone de la grille (en dessous du chrono)
-                    col = x // CELL_SIZE
-                    lig = (y - 50) // CELL_SIZE  # Ajustement pour l'offset vertical
+            pygame.display.flip()
 
-            # Actions sur clic
-            if event.type == pygame.MOUSEBUTTONDOWN and y >= 50:
-                if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes and not grille.game_over:
-                    # Démarrer le jeu au premier clic valide
-                    if not jeu_demarre:
-                        jeu_demarre = True
-                        temps_debut = pygame.time.get_ticks()
+            # Gestion des événements
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
 
-                    # Clic droit : drapeau
-                    if event.button == 3:
-                        grille.put_flag(lig, col)
-                        clicks += 1
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if SCREEN_WIDTH//2-70 <= mouse_pos[0] <= SCREEN_WIDTH//2+70 and \
+                       SCREEN_HEIGHT//2-25 <= mouse_pos[1] <= SCREEN_HEIGHT//2+25:
+                        show_welcome = False
+        start = True
+        play = False
+        jeu_demarre = False
+        temps_debut = 0
+        temps_ecoule = 0
+        grille_lignes, grille_colonnes, num_mines = 0,0,0
+        clicks = 1
+        revealed = 0
+        start_time = 0
+        show_stats = False
+
+        while start:
+            #dessiner la page d'accueil avec 3 niveaux de difficulté
+            screen.fill(BG_COLOR)
+            font = pygame.font.SysFont('Consolas', 50)
+            title_text = font.render("Démineur", True, BLACK)
+            title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
+            screen.blit(title_text, title_rect)
+            font = pygame.font.SysFont('Consolas', 30)
+            easy_text = font.render("Facile", True, BLACK)
+            easy_rect = easy_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+            screen.blit(easy_text, easy_rect)
+            medium_text = font.render("Moyen", True, BLACK)
+            medium_rect = medium_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
+            screen.blit(medium_text, medium_rect)
+            hard_text = font.render("Difficile", True, BLACK)
+            hard_rect = hard_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+            screen.blit(hard_text, hard_rect)
+            pygame.display.flip()
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    x, y = pygame.mouse.get_pos()
+                    if easy_rect.collidepoint(x, y):
+                        grille_lignes, grille_colonnes, num_mines = 9, 9, 10
+                        play = True
+                        start = False
+                    elif medium_rect.collidepoint(x, y):
+                        grille_lignes, grille_colonnes, num_mines = 14, 14, 30
+                        play = True
+                        start = False
+                    elif hard_rect.collidepoint(x, y):
+                        grille_lignes, grille_colonnes, num_mines = 16, 16, 50
+                        play = True
+                        start = False
+
+        grille = Grille(grille_lignes,grille_colonnes,num_mines)  # Initialisation de la grille
+        while play:
+            if jeu_demarre and not grille.game_over:
+                temps_ecoule = pygame.time.get_ticks() - temps_debut if jeu_demarre else 0
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    return
+
+                # Gestion des événements souris
+                if event.type in (pygame.MOUSEBUTTONDOWN, pygame.MOUSEMOTION):
+                    x, y = pygame.mouse.get_pos()
+                    if y >= 50:  # Zone de la grille (en dessous du chrono)
+                        col = x // CELL_SIZE
+                        lig = (y - 50) // CELL_SIZE  # Ajustement pour l'offset vertical
+
+                # Actions sur clic
+                if event.type == pygame.MOUSEBUTTONDOWN and y >= 50:
+                    if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes and not grille.game_over:
+                        # Démarrer le jeu au premier clic valide
+                        if not jeu_demarre:
+                            jeu_demarre = True
+                            temps_debut = pygame.time.get_ticks()
+
+                        # Clic droit : drapeau
+                        if event.button == 3:
+                            grille.put_flag(lig, col)
+                            clicks += 1
 
 
-                    # Clic gauche : révélation
-                    elif event.button == 1:
-                        grille.reveal_cell(lig, col)
-                        clicks+=1
-                        revealed +=1
-                        if grille.cells[lig][col].has_mine:  # Vérification défaite
-                            grille.game_over = True
-                # Gestion de l'affichage
-                if grille.game_over or verifier_victoire(grille,grille_lignes,grille_colonnes):
+                        # Clic gauche : révélation
+                        elif event.button == 1:
+                            grille.reveal_cell(lig, col)
+                            clicks+=1
+                            revealed +=1
+                            if grille.cells[lig][col].has_mine:  # Vérification défaite
+                                grille.game_over = True
+                    # Gestion de l'affichage
+                    if grille.game_over or verifier_victoire(grille,grille_lignes,grille_colonnes):
 
-                    efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
-                    stats_data = {
-                        'time': temps_ecoule,
-                        'clicks': clicks,
-                        'efficiency': efficacite,
-                        'result': "VICTOIRE !" if grille.victoire else "PERDU !",
-                        'grille': grille
-                    }
+                        efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
+                        stats_data = {
+                            'time': temps_ecoule,
+                            'clicks': clicks,
+                            'efficiency': efficacite,
+                            'result': "VICTOIRE !" if grille.victoire else "PERDU !",
+                            'grille': grille
+                        }
 
-                    show_stats = handle_stats_screen(screen, grille, stats_data)
-                    if not show_stats:
-                        play = False  # Retour au menu
-                  
-        # Affichage
-        screen.fill(BG_COLOR)
-        dessiner_grille(screen, grille)
-        afficher_flags(screen, grille.num_mines - grille.flags_places,grille.num_mines)
+                        show_stats = handle_stats_screen(screen, grille, stats_data)
+                        if not show_stats:
+                            play = False  # Retour au menu
 
-        if jeu_demarre:
-            afficher_chrono(screen, temps_ecoule)
+            # Affichage
+            screen.fill(BG_COLOR)
+            dessiner_grille(screen, grille)
+            afficher_flags(screen, grille.num_mines - grille.flags_places,grille.num_mines)
 
-        pygame.display.flip()
+            if jeu_demarre:
+                afficher_chrono(screen, temps_ecoule)
 
-    pygame.quit()
+            pygame.display.flip()
+
+        pygame.quit()
 
 
 if __name__ == "__main__":

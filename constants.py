@@ -1,6 +1,6 @@
 # dimensions
-SCREEN_WIDTH = 500
-SCREEN_HEIGHT = 500
+SCREEN_WIDTH = 460
+SCREEN_HEIGHT = 600
 CELL_SIZE = 25 # Taille plus grande pour meilleure visibilité
 
 
