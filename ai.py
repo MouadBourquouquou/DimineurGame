@@ -12,12 +12,36 @@ class AIPlayer:
 
     def observe_player(self, move):
         """
-        Observe le coup joué par le joueur humain.
+        Observe et enregistre le coup joué par le joueur humain.
 
         Args:
-            move (tuple): La position jouée par le joueur, ex : (x, y)
+            move (dict): Un dictionnaire contenant l'action du joueur, ex :
+                        {
+                            'action': 'click',
+                            'position': (x, y),
+                            'value': None  # ou un chiffre pour number_revealed
+                        }
+
+            les action comme vous voyez dans la methode on a click,flag,number_revealed
         """
-        pass  # À implémenter
+        self.memory.append(move)
+
+        pos = move['position']
+        action = move['action']
+
+        if action == 'click':
+            self.visited.add(pos)
+        elif action == 'flag':
+            self.dangerous_cells.add(pos)
+        elif action == 'number_revealed':
+            self.visited.add(pos)
+            if move['value'] == 0:
+                self.safe_cells.add(pos)
+                x, y = pos
+                directions = [(-1, -1), (-1, 0), (-1, 1),(0, -1),(0, 1),(1, -1), (1, 0), (1, 1)]
+                for dx, dy in directions:
+                    neighbor = (x + dx, y + dy)
+                    self.safe_cells.add(neighbor)
 
     def choose_move(self):
         """
