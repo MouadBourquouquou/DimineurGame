@@ -97,7 +97,38 @@ class AIPlayer:
                     neighbor = (x + dx, y + dy)
                     self.safe_cells.add(neighbor)""" #cela fait partie de la tache 4.
                      
+<<<<<<< HEAD
        
+=======
+
+    def choose_move(self):#Choisit la prochaine case que l'IA va jouer
+
+        #  Chercher une case  sûre (c-a-d sans mine)
+        for pos in self.safe_cells:
+            if pos not in self.visited:
+                # Retourner la  case sûre trouvée et non  visitée
+                return pos
+
+        # Si aucune case sûre, chercher une case aléatoire qui n'est pas  dangereuse
+        for x in range(self.width):
+            for y in range(self.height):
+                pos = (x, y)
+                if pos not in self.visited and pos not in self.dangerous_cells:
+                    # Retourner la première case non visitée et non dangereuse 
+                    return pos
+
+        # Si toujours rien, choisir n'importe quelle case non visitée (risque possible)
+        for x in range(self.width):
+            for y in range(self.height):
+                pos = (x, y)
+                if pos not in self.visited:
+                    # Retourner la première case libre trouvée
+                    return pos
+
+        #  Si toutes les cases ont été visitées, plus aucun coup à jouer
+        return None
+
+>>>>>>> f98327cdc80cdcd6edeac23bc30ac569cebe0eb6
 
     def update_knowledge(self, position, feedback):
         """
