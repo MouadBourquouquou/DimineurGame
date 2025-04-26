@@ -92,4 +92,8 @@ class Grille:
                 if 0 <= voisin_lig < self.grille_lignes and 0 <= voisin_col < self.grille_colonnes:
                     if self.cells[voisin_lig][voisin_col].has_mine:
                         mines += 1
-        return mines
+        return mines 
+    
+
+
+    

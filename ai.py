@@ -1,12 +1,13 @@
+from grille import *
 class AIPlayer:
     def __init__(self):
         # Historique des coups joués par l'IA et l'adversaire
-        self.memory = []
+        self.memory = [] #liste de dictionnaire contenant l'historique complet et détaillé des coups du joueur(peut contenir des doublons)
 
-        self.visited = set()
+        self.visited = set() #liste des cases déjà cliquées (sans doublons)
 
 
-        self.safe_cells = set()
+        self.safe_cells = set() #liste des cases sûres (sans doublons)
 
         self.dangerous_cells = set()
 
@@ -35,13 +36,14 @@ class AIPlayer:
             self.dangerous_cells.add(pos)
         elif action == 'number_revealed':
             self.visited.add(pos)
-            if move['value'] == 0:
+            """if move['value'] == 0:
                 self.safe_cells.add(pos)
                 x, y = pos
                 directions = [(-1, -1), (-1, 0), (-1, 1),(0, -1),(0, 1),(1, -1), (1, 0), (1, 1)]
                 for dx, dy in directions:
                     neighbor = (x + dx, y + dy)
-                    self.safe_cells.add(neighbor)
+                    self.safe_cells.add(neighbor)""" #cela fait partie de la tache 4.
+                     
 
     def choose_move(self):
         """
@@ -61,3 +63,29 @@ class AIPlayer:
             feedback (str): Le résultat du coup (ex: "safe", "danger", etc.)
         """
         pass  # À implémenter
+    
+
+    def safe_zone(self, position): #Vérifie si la position donnée est dans une zone sûre.
+        #avant de l'introduire au main faut d'abord s'assurer que 
+        for move in self.memory:
+            if position == move['position'] : #Parcourir toutes les actions dans self.memory
+                if move['action'] == 'number_revealed':
+                    self.safe_cells.add(position)
+                if move['action'] == 'flag':
+                    x,y=position
+                    # Vérifier les voisins de la cellule actuelle
+                    voisins = []
+                    directions = [(-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1)]
+                    for dx, dy in directions:
+                        voisin_lig = x + dx
+                        voisin_col = y + dy
+                        voisins.append((voisin_lig, voisin_col))
+
+                    #nbre de drapeaux dans les voisins
+                    nb_flag = sum(1 for nx, ny in voisins if (nx, ny) in self.dangerous_cells)
+                    if nb_flag == move['value']:
+                        # Si le nombre de drapeaux correspond à la valeur révélée, on peut marquer les voisins comme sûrs
+                        for nx, ny in voisins:
+                            if (nx, ny) not in self.dangerous_cells:
+                                self.safe_cells.add((nx, ny))
+                    
