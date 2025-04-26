@@ -9,7 +9,59 @@ class AIPlayer:
 
         self.safe_cells = set() #liste des cases sûres (sans doublons)
 
-        self.dangerous_cells = set()
+        self.dangerous_cells = set() #contient les positions sûres des mines.
+        self.danger_map = dict() ## contient les voisins des drapeaux,
+        ##avec un score.danger_map [(x, y)] = nombre de fois où cette case est proche d'une mine probable.
+
+        """danger_map[(2,3)] = 2
+        La case (2,3) est soupçonnée d'être dangereuse.
+
+        Elle est devenue suspecte 2 fois.
+
+        cad: il y a 2 drapeaux posés autour d elle (dans ses voisins).
+
+        Plus le nombre est grand, plus la case est considérée comme risquée par l'IA. """
+        
+    ## hanane s part
+    def mark_danger_around_flag(self, position):
+        x, y = position
+
+        self.dangerous_cells.add((x, y)) ##la case du drapeau elle est dangeruse extremement
+        
+        ## les directiions autour la cellule du drapeau il y a 8 cellules voisines=> donc il y a 8 directions
+        directions = [(-1, -1), (-1, 0), (-1, 1),
+                  (0, -1),          (0, 1),
+                  (1, -1),  (1, 0),  (1, 1)]
+        """ chaque couple (dx.dy) represente un direction 
+        dx=deplacement verticale(sur la ligne)
+        dx=deplacement horizontale(sur la colonne)
+
+        -1 = aller en haut
+
+        0 = rester sur la même ligne
+
+        +1 = aller en bas
+
+        """
+
+        ## marquer les voisins de la case du drapeau comme suspects(elles peuvent etre dangreuses)
+        for dx, dy in directions:
+            voisin=(x+dx,y+dy)
+
+            if voisin in self.visited or voisin in self.dangerous_cells: 
+                ## j ignore les cases deja visités ou bien connue comme un mine(contient un drapeau)
+                continue
+
+            if voisin in self.danger_map:
+
+                ## si le voisi est deja un voisin d une autre flag j incremente le score de dangerosité
+                self.danger_map[voisin]+=1 
+                
+            else:
+                ## si le voisin n a pas d drapeaux posés autour d elle=> alors  le score=1 
+                self.danger_map[voisin]=1 
+
+                
 
     def observe_player(self, move):
         """
@@ -34,6 +86,7 @@ class AIPlayer:
             self.visited.add(pos)
         elif action == 'flag':
             self.dangerous_cells.add(pos)
+            self.mark_danger_around_flag(pos)
         elif action == 'number_revealed':
             self.visited.add(pos)
             """if move['value'] == 0:
@@ -44,15 +97,7 @@ class AIPlayer:
                     neighbor = (x + dx, y + dy)
                     self.safe_cells.add(neighbor)""" #cela fait partie de la tache 4.
                      
-
-    def choose_move(self):
-        """
-        Choisit le prochain coup à jouer par l'IA.
-
-        Returns:
-            tuple: La position choisie par l'IA, ex : (x, y)
-        """
-        pass  # À implémenter
+       
 
     def update_knowledge(self, position, feedback):
         """

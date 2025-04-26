@@ -1,6 +1,7 @@
 import pygame
 from resultats import *
 from grille import Grille
+from ai import AIPlayer
 # from resultats import fin_de_jeu
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
