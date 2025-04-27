@@ -291,6 +291,7 @@ def play_game(grille_lignes, grille_colonnes, num_mines):
                                         grille.game_over = True
 
         ai_player.observe_player(move)  # Observer le coup du joueur
+        ai_player.safe_zone(move["position"])
         
         if not grille.game_over and jeu_demarre and AIturn == True and AI_thinking_time == 0:
             ai_move = ai_player.play(grille)
@@ -337,14 +338,20 @@ def play_game(grille_lignes, grille_colonnes, num_mines):
 
 def main():
     pygame.init()
-    
+    restart = 0
+    grille_colonnes = 0
+    grille_lignes = 0
+    num_mines = 0
     while True:
-        show_welcome_screen()
-        grille_lignes, grille_colonnes, num_mines = choose_difficulty()
+        if restart == 0 :  
+            show_welcome_screen()
+            grille_lignes, grille_colonnes, num_mines = choose_difficulty()
         action = play_game(grille_lignes, grille_colonnes, num_mines)
         if action == "menu":
+            restart = 0
             continue
         elif action == "restart":
+            restart = 1
             continue
         else:
             break

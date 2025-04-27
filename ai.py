@@ -67,7 +67,7 @@ class AIPlayer:
                         voisins.append((voisin_lig, voisin_col))
 
                     nb_flag = sum(1 for nx, ny in voisins if (nx, ny) in self.dangerous_cells)
-                    if nb_flag == move['value']:
+                    if nb_flag == move['position']:
                         for nx, ny in voisins:
                             if (nx, ny) not in self.dangerous_cells:
                                 self.safe_cells.add((nx, ny))
