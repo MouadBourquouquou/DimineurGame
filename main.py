@@ -144,100 +144,80 @@ def handle_stats_screen(screen, grille, stats_data):
                     return action
     return None
 
-def main():
-    # État pour la page d'accueil
+def show_welcome_screen():
     show_welcome = True
-    ai_move = None 
-    ai_turn = False
-    
     while show_welcome:
-        # Dessiner la page d'accueil
         screen.fill(BG_COLOR)
-        
-        # Titre
         welcome_font = pygame.font.SysFont('Consolas', 60)
         welcome_text = welcome_font.render("DÉMINEUR", True, BLACK)
         welcome_rect = welcome_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//3))
         screen.blit(welcome_text, welcome_rect)
-        
-        # Bouton Start
+
         start_font = pygame.font.SysFont('Consolas', 30)
         start_text = start_font.render("START", True, BLACK)
         start_rect = start_text.get_rect(center=(SCREEN_WIDTH//2, SCREEN_HEIGHT//2))
         pygame.draw.rect(screen, (100, 100, 100), (SCREEN_WIDTH//2-70, SCREEN_HEIGHT//2-25, 140, 50))
         screen.blit(start_text, start_rect)
-        
+
         pygame.display.flip()
-        
-        # Gestion des événements
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                return
-            
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                mouse_pos = pygame.mouse.get_pos()
-                if SCREEN_WIDTH//2-70 <= mouse_pos[0] <= SCREEN_WIDTH//2+70 and \
-                   SCREEN_HEIGHT//2-25 <= mouse_pos[1] <= SCREEN_HEIGHT//2+25:
+                if start_rect.collidepoint(event.pos):
                     show_welcome = False
-    start = True
-    play = False
-    jeu_demarre = False
-    grille_lignes, grille_colonnes, num_mines = 0,0,0
-    clicks = 1
-    revealed = 0
-    start_time = 0
-    show_stats = False
 
-    while start:
-        #dessiner la page d'accueil avec 3 niveaux de difficulté
+def choose_difficulty():
+    while True:
         screen.fill(BG_COLOR)
         font = pygame.font.SysFont('Consolas', 50)
         title_text = font.render("Démineur", True, BLACK)
         title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 - 50))
         screen.blit(title_text, title_rect)
+
         font = pygame.font.SysFont('Consolas', 30)
         easy_text = font.render("Facile", True, BLACK)
-        easy_rect = easy_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
-        screen.blit(easy_text, easy_rect)
         medium_text = font.render("Moyen", True, BLACK)
-        medium_rect = medium_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
-        screen.blit(medium_text, medium_rect)
         hard_text = font.render("Difficile", True, BLACK)
+
+        easy_rect = easy_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 20))
+        medium_rect = medium_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 60))
         hard_rect = hard_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 100))
+
+        screen.blit(easy_text, easy_rect)
+        screen.blit(medium_text, medium_rect)
         screen.blit(hard_text, hard_rect)
+
         pygame.display.flip()
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                return
-
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = pygame.mouse.get_pos()
-                if easy_rect.collidepoint(x, y): 
-                    grille_lignes, grille_colonnes, num_mines = 9, 9, 10
-                    play = True
-                    start = False
+                if easy_rect.collidepoint(x, y):
+                    return 9, 9, 10
                 elif medium_rect.collidepoint(x, y):
-                    grille_lignes, grille_colonnes, num_mines = 14, 14, 30
-                    play = True
-                    start = False
+                    return 14, 14, 30
                 elif hard_rect.collidepoint(x, y):
-                    grille_lignes, grille_colonnes, num_mines = 16, 16, 50
-                    play = True
-                    start = False
-            
-    grille = Grille(grille_lignes,grille_colonnes,num_mines)  # Initialisation de la grille
-    ai_player = AIPlayer()  # Votre IA existante
-    ai_visualizer = AIVisualizer()  # Initialisation du visualiseur
+                    return 16, 16, 50
+
+def play_game(grille_lignes, grille_colonnes, num_mines):
+    grille = Grille(grille_lignes, grille_colonnes, num_mines)
+    ai_player = AIPlayer()
+    ai_visualizer = AIVisualizer()
+
     jeu_demarre = False
     temps_debut = 0
     temps_ecoule = 0
     clicks = 1
     revealed = 0
     play = True
+    AIturn = False  # Indique si c'est le tour de l'IA de jouer
 
-    # Boucle principale du jeu
     while play:
         if jeu_demarre and not grille.game_over:
             temps_ecoule = pygame.time.get_ticks() - temps_debut
@@ -245,73 +225,75 @@ def main():
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
         afficher_flags(screen, grille.num_mines - grille.flags_places, grille.num_mines)
-        
+
         if jeu_demarre:
             afficher_chrono(screen, temps_ecoule)
-        
+
         draw_control_buttons()
         pygame.display.flip()
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                return
-                
+                exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                # Vérifier les boutons de contrôle
                 action = check_button_click(event.pos)
                 if action == "quit":
                     pygame.quit()
-                    return
+                    exit()
                 elif action == "restart":
-                    grille = Grille(grille_lignes, grille_colonnes, num_mines)
-                    jeu_demarre = False
-                    temps_debut = 0
-                    temps_ecoule = 0
-                    clicks = 1
-                    revealed = 0
-                    continue
+                    return "restart"
                 elif action == "menu":
-                    play = False
-                    main()  # Retour au menu principal
-                    return
-                
-                # Gestion des clics sur la grille
-                x, y = pygame.mouse.get_pos()
+                    return "menu"
+
+                x, y = event.pos
                 if y >= 50:
                     col = x // CELL_SIZE
                     lig = (y - 50) // CELL_SIZE
-                    
                     if 0 <= lig < grille_lignes and 0 <= col < grille_colonnes and not grille.game_over:
                         if not jeu_demarre:
                             jeu_demarre = True
                             temps_debut = pygame.time.get_ticks()
-                            
-                        if event.button == 3:  # Clic droit
+
+                        if event.button == 3:  # clic droit
                             grille.put_flag(lig, col)
                             clicks += 1
-                        elif event.button == 1:  # Clic gauche
+                             # Indique que c'est le tour de l'IA après un clic droit
+                        elif event.button == 1:  # clic gauche
+                            AIturn = True
                             if not grille.cells[lig][col].flagged:
                                 if grille.reveal_cell(lig, col):
                                     clicks += 1
                                     revealed += 1
                                     if grille.cells[lig][col].has_mine:
+                                        print("Vous avez cliqué sur une mine !")
                                         grille.game_over = True
-        if ai_turn:# Si vous implémentez un système de tours
-            ai_move = ai_player.choose_move()
-        if ai_move:
-            lig, col = ai_move
-            grille.reveal_cell(lig, col)
-            ai_player.last_move = (lig, col)  # Mise à jour pour la visualisation
 
-    # ▼▼▼▼▼▼ Visualisation de l'IA ▼▼▼▼▼▼
+        
+        if not grille.game_over and jeu_demarre and AIturn == True:
+            ai_move = ai_player.play(grille)
+            print(f"IA a clické sur cette cellule : {ai_move}")
+            
+            AIturn = False  # Réinitialiser le tour de l'IA après son mouvement
+            if ai_move:
+                lig, col = ai_move
+                if not grille.cells[lig][col].revealed and not grille.cells[lig][col].flagged:
+                    if grille.reveal_cell(lig, col):
+                        clicks += 1
+                        revealed += 1
+                        if grille.cells[lig][col].has_mine:
+                            print("L'IA a cliqué sur une mine !")
+                            grille.game_over = True
+                            
+
+        # Visualisation IA
         ai_data = {
             "danger_map": ai_player.danger_map,
             "safe_cells": list(ai_player.safe_cells),
             "last_move": ai_player.last_move
-            }
+        }
         ai_visualizer.draw_overlay(screen, ai_data, CELL_SIZE)
-        # Vérifier fin de partie
+
         if grille.game_over or verifier_victoire(grille, grille_lignes, grille_colonnes):
             efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
             stats_data = {
@@ -321,25 +303,29 @@ def main():
                 'result': "VICTOIRE !" if grille.victoire else "PERDU !",
                 'grille': grille
             }
-            
             action = handle_stats_screen(screen, grille, stats_data)
             if action == "quit":
                 pygame.quit()
-                return
+                exit()
             elif action == "restart":
-                grille = Grille(grille_lignes, grille_colonnes, num_mines)
-                jeu_demarre = False
-                temps_debut = 0
-                temps_ecoule = 0
-                clicks = 1
-                revealed = 0
+                return "restart"
             elif action == "menu":
-                play = False
-                main()
-                return
+                return "menu"
 
+def main():
+    pygame.init()
+    
+    while True:
+        show_welcome_screen()
+        grille_lignes, grille_colonnes, num_mines = choose_difficulty()
+        action = play_game(grille_lignes, grille_colonnes, num_mines)
+        if action == "menu":
+            continue
+        elif action == "restart":
+            continue
+        else:
+            break
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()

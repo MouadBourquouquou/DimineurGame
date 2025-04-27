@@ -26,8 +26,10 @@ class ChampDeMines:
         ]
         positions = random.sample(positions_possibles, self.nb_mines)
         self.mines = [Mine(x, y) for (x, y) in positions]
+        i=0
         for mine in self.mines:
-            print(f"{mine.position()} - ")
+            print(f"mine {i}: {mine.position()} ")
+            i+=1
 
     def reveler(self, x, y):
         for mine in self.mines:
