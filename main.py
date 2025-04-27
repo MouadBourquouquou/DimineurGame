@@ -2,6 +2,7 @@ import pygame
 from resultats import *
 from grille import Grille
 from ai import AIPlayer
+from visualization import AIVisualizer
 # from resultats import fin_de_jeu
 pygame.init()  # Initialise tous les modules Pygame et Active les modules graphiques/audio/inputs
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # Crée la fenêtre de jeu avec les dimensions définies dans constants.py
@@ -146,6 +147,8 @@ def handle_stats_screen(screen, grille, stats_data):
 def main():
     # État pour la page d'accueil
     show_welcome = True
+    ai_move = None 
+    ai_turn = False
     
     while show_welcome:
         # Dessiner la page d'accueil
@@ -225,6 +228,8 @@ def main():
                     start = False
             
     grille = Grille(grille_lignes,grille_colonnes,num_mines)  # Initialisation de la grille
+    ai_player = AIPlayer()  # Votre IA existante
+    ai_visualizer = AIVisualizer()  # Initialisation du visualiseur
     jeu_demarre = False
     temps_debut = 0
     temps_ecoule = 0
@@ -292,6 +297,20 @@ def main():
                                     revealed += 1
                                     if grille.cells[lig][col].has_mine:
                                         grille.game_over = True
+        if ai_turn:# Si vous implémentez un système de tours
+            ai_move = ai_player.choose_move()
+        if ai_move:
+            lig, col = ai_move
+            grille.reveal_cell(lig, col)
+            ai_player.last_move = (lig, col)  # Mise à jour pour la visualisation
+
+    # ▼▼▼▼▼▼ Visualisation de l'IA ▼▼▼▼▼▼
+        ai_data = {
+            "danger_map": ai_player.danger_map,
+            "safe_cells": list(ai_player.safe_cells),
+            "last_move": ai_player.last_move
+            }
+        ai_visualizer.draw_overlay(screen, ai_data, CELL_SIZE)
         # Vérifier fin de partie
         if grille.game_over or verifier_victoire(grille, grille_lignes, grille_colonnes):
             efficacite = (revealed / clicks) * 100 if clicks > 0 else 0
