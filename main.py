@@ -59,9 +59,9 @@ def afficher_chrono(screen, temps_ms):
 
 
 def afficher_message(screen, message):
-    font = pygame.font.SysFont(None, 40)
+    font = pygame.font.SysFont('Consolas', 30)
     text = font.render(message, True, (255, 0, 0))
-    rect = text.get_rect(center=(screen.get_width() // 2, 25))
+    rect = text.get_rect(center=(screen.get_width() // 2 , 500))
     screen.blit(text, rect)
 
 
@@ -217,20 +217,38 @@ def play_game(grille_lignes, grille_colonnes, num_mines):
     revealed = 0
     play = True
     AIturn = False  # Indique si c'est le tour de l'IA de jouer
+    AI_thinking_time = 100  # Temps de réflexion de l'IA
+    AI_thinking_time_max = 100  # Temps de réflexion maximum de l'IA
+    
+     
+    move = {"position": None, "action": None, "position": None}
 
     while play:
+        
         if jeu_demarre and not grille.game_over:
             temps_ecoule = pygame.time.get_ticks() - temps_debut
 
         screen.fill(BG_COLOR)
         dessiner_grille(screen, grille)
         afficher_flags(screen, grille.num_mines - grille.flags_places, grille.num_mines)
+        #Ajouter un message visuel ou indicateur : “Tour du joueur / Tour de l’IA”.
+        if AIturn:
+            afficher_message(screen, "AI is thinking...")
+            AI_thinking_time -= 1 
+        else:
+            
+            afficher_message(screen, "Tour du joueur")
+            
+        
 
         if jeu_demarre:
             afficher_chrono(screen, temps_ecoule)
 
         draw_control_buttons()
         pygame.display.flip()
+        
+        # add a visual message for the player playing the game
+        
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -255,26 +273,31 @@ def play_game(grille_lignes, grille_colonnes, num_mines):
                             jeu_demarre = True
                             temps_debut = pygame.time.get_ticks()
 
-                        if event.button == 3:  # clic droit
+                        if event.button == 3 and AI_thinking_time == AI_thinking_time_max:  # clic droit
+                            AIturn = True
                             grille.put_flag(lig, col)
+                            move = {"position": (lig, col), "action": "flag"}
                             clicks += 1
                              # Indique que c'est le tour de l'IA après un clic droit
-                        elif event.button == 1:  # clic gauche
+                        elif event.button == 1 and AI_thinking_time == AI_thinking_time_max:  # clic gauche
                             AIturn = True
                             if not grille.cells[lig][col].flagged:
                                 if grille.reveal_cell(lig, col):
                                     clicks += 1
                                     revealed += 1
+                                    move = {"position": (lig, col), "action": "click"}
                                     if grille.cells[lig][col].has_mine:
                                         print("Vous avez cliqué sur une mine !")
                                         grille.game_over = True
 
+        ai_player.observe_player(move)  # Observer le coup du joueur
         
-        if not grille.game_over and jeu_demarre and AIturn == True:
+        if not grille.game_over and jeu_demarre and AIturn == True and AI_thinking_time == 0:
             ai_move = ai_player.play(grille)
             print(f"IA a clické sur cette cellule : {ai_move}")
             
             AIturn = False  # Réinitialiser le tour de l'IA après son mouvement
+            AI_thinking_time = AI_thinking_time_max # Réinitialiser le temps de réflexion de l'IA
             if ai_move:
                 lig, col = ai_move
                 if not grille.cells[lig][col].revealed and not grille.cells[lig][col].flagged:
