@@ -12,6 +12,8 @@ class AIPlayer:
         self.dangerous_cells = set() #contient les positions sûres des mines.
         self.danger_map = dict() ## contient les voisins des drapeaux,
         ##avec un score.danger_map [(x, y)] = nombre de fois où cette case est proche d'une mine probable.
+        self.last_move = None  # Pour stocker le dernier coup de l'IA
+
 
         """danger_map[(2,3)] = 2
         La case (2,3) est soupçonnée d'être dangereuse.
@@ -106,6 +108,7 @@ class AIPlayer:
         #  Chercher une case  sûre (c-a-d sans mine)
         for pos in self.safe_cells:
             if pos not in self.visited:
+                self.last_move = pos
                 # Retourner la  case sûre trouvée et non  visitée
                 return pos
 
@@ -115,6 +118,7 @@ class AIPlayer:
                 pos = (x, y)
                 if pos not in self.visited and pos not in self.dangerous_cells:
                     # Retourner la première case non visitée et non dangereuse 
+                    self.last_move = pos
                     return pos
 
         # Si toujours rien, choisir n'importe quelle case non visitée (risque possible)
@@ -123,6 +127,7 @@ class AIPlayer:
                 pos = (x, y)
                 if pos not in self.visited:
                     # Retourner la première case libre trouvée
+                    self.last_move = pos
                     return pos
 
         #  Si toutes les cases ont été visitées, plus aucun coup à jouer
